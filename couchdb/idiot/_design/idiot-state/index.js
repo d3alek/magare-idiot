@@ -1,4 +1,2 @@
 exports.package = require('./package.json')
-exports.updates = {
-  'state': require('./updates/state')
-}
+exports.updates = require('./updates/state')
