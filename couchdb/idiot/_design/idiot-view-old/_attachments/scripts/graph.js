@@ -29,9 +29,6 @@ var writes_area = d3.area()
     .y0(function(d) { return writes_y(d.id) + writes_y.bandwidth(); })
     .defined(function(d) { return d.value && d.value !== 0; });
 
-//var displayables_config = JSON.parse(document.getElementById("displayables-input").textContent);
-var displayables_config = app.displayablesConfig;
-
 function senses_line(id) {
   if (getConfig(id).type === "percent") {
     return percents_line;
@@ -60,24 +57,12 @@ function getColor(sense_id) {
   return getConfig(sense_id).color;
 };
 
-d3.select("#switch-graph").on("click", function() {
-  selected = d3.select(this)
-  if (selected.text() == "Стара графика") {
-    d3.select("#graph-container").classed("hidden", true);
-    d3.select("#old-graph-container").classed("hidden", false);
-    selected.text("Нова графика");
-  }
-    
-  else {
-    d3.select("#graph-container").classed("hidden", false);
-    d3.select("#old-graph-container").classed("hidden", true);
-    selected.text("Стара графика");
-  }
-});
-
 function fetch_and_redraw() {
   d3.event.preventDefault();
   d3.select(".loading").classed("hidden", false);
+
+  //d3.json(displayQuery(app.thing, from, to), redraw);
+
   since_days = this.dataset.sinceDays;
   since_hours = this.dataset.sinceHours;
 

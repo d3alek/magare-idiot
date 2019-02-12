@@ -10,7 +10,7 @@ function historyViewQuery(thing, from, to) {
 }
 
 function getConfig(id) {
-  var config = displayables_config[id];
+  var config = app.display[id];
 
   if (!config) {
     config = {

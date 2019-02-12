@@ -12,13 +12,17 @@ var app = new Vue({
   data: {
     thing: "ESP-9286500",
     senses: {},
-    desired: {},
-    displayablesConfig: {
+    state: {},
+    display: {
       'A0': {
         graph: true,
         type: 'percent',
       },
-      'time': {}
+      'time': {},
+      'b': {
+        graph: true,
+        type: 'percent'
+      }
     }
   }
 })
