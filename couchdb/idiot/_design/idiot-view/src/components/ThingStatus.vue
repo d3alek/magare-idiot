@@ -1,50 +1,89 @@
 <template>
   <div class="thing-status">
-    <h3>{{ thing }}</h3>
-    <pre>{{ JSON.stringify(state, null, 2) }}</pre>
+    <h4 :class="status">{{localize(status).slice(1)}}</h4>
   </div>
 </template>
 
 <script>
-
 export default {
   name: "ThingStatus",
   props: {
-    thing: String,
     state: Object
   },
-  pouch: {
-    state() {
-      console.log(this.thing)
-      return { 
-        database: 'idiot',
-        selector: {_id: this.thing},
-        first: true
+  computed: {
+    status: function() {
+      if (!this.state || !this.state.reported || !this.state.reported.timestamp) {
+        return 'unknown';
+      }
+      var reported = this.state.reported;
+
+      var reported_utc = new Date(reported.timestamp);
+      var reported_millis = reported_utc.getTime(); // enchanted utc time in millis
+      var now_millis = new Date().getTime(); // current utc time in millis 
+      if (now_millis - reported_millis > 5000*60) {
+        return 'down';
+      }
+      else {
+        return 'up';
       }
     }
   },
-  created: function() {
-//  created: function() {
-//      // Send all documents to the remote database, and stream changes in real-time. Note if you use filters you need to set them correctly for pouchdb and couchdb. You can set them for each direction separatly: options.push/options.pull. PouchDB might not need the same filter to push documents as couchdb to send the filtered requested documents.
-      this.$pouch.sync('idiot', 'http://localhost:5984/idiot', {});
+  methods: {
+    localize: function localize(s) {
+      if (s === 'unknown') {
+        return 'грешка';
+      }
+      if (s === 'up') {
+        return 'живо';
+      }
+      if (s === 'down') {
+        return 'неизвестно';
+      }
     }
+  }
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+.up:before {
+    content: 'ж';
+    -webkit-border-radius: 10px;
+    border-radius: 20px;
+    border: none;
+    color: #4CAF50;
+    font-size: 20px;
+    text-align: center;
+    animation: glowing-green 1500ms infinite;
+    width: 25px;
+    height: 25px;
+    display: inline-block;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.down:before {
+    content: 'н';
+    -webkit-border-radius: 10px;
+    border-radius: 20px;
+    border: none;
+    color: #AD1717;
+    font-size: 20px;
+    text-align: center;
+    width: 15px;
+    height: 25px;
+    display: inline-block;
+
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+
+.error:before {
+    content: 'г';
+    -webkit-border-radius: 10px;
+    border-radius: 30px;
+    border: none;
+    color: #9e9e9e;
+    font-size: 20px;
+    text-align: center;
+    width: 15px;
+    height: 25px;
+    display: inline-block;
+
 }
 </style>

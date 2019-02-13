@@ -9,11 +9,9 @@ var db = PouchDB('idiot')
 
 PouchDB.prototype.mine = 'true';
 
-import pouchVue from "pouch-vue";
+import PouchVue from "pouch-vue";
 
-Vue.use(pouchVue, {
+Vue.use(PouchVue, {
   pouch: PouchDB, // optional if `PouchDB` is available on the global object
   defaultDB: 'idiot', // this is used as a default connect/disconnect database
 });
-
-//export default new PouchVue();
