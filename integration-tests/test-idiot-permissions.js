@@ -11,11 +11,8 @@ var db;
 var adminDb;
 var usersDb;
 
-function doc(author) {
-  if (!author) {
-    author = 'test-user';
-  }
-  return {_id: 'test-doc', author:author};
+function doc() {
+  return {_id: 'test-doc'};
 }
 
 async function givenRole(...roleNames) {
@@ -31,13 +28,13 @@ async function givenRole(...roleNames) {
 
 describe(ddName, () => {
   before( async () => {
-    const server = await util.getServer();
-    const url = 'http://' + server + ddName;
+    const server = process.env.TEST_COUCHDB_ADDR;
+    const url = 'http://' + server + '/' + ddName;
     anonymousDb = new util.AnonymousDB(url);
     db = new util.AuthenticatedDB(url);
     adminDb = new util.AdminDB(url);
 
-    const usersUrl = 'http://' + server + '_users';
+    const usersUrl = 'http://' + server + '/_users';
     usersDb = new util.AdminDB(usersUrl);
 
     await util.putValidation(server, ddName);
@@ -101,11 +98,6 @@ describe(ddName, () => {
     await givenRole('idiot', 'robot');
     const response = await db.put(doc()).catch(throwMessage);
     expect(response.ok).to.be.true;
-  });
-
-  it('document author not user fails', async () => {
-    const response = await db.put(doc('another-user')).catch(logMessage);
-    expect(response).to.be.undefined;
   });
 });
 

@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 const util = require('./util.js');
 
 const ddName = "idiot-history";
-const viewName = "history";
+const viewName = "idiot-history";
 
 const throwMessage = util.throwMessage;
 
@@ -26,8 +26,8 @@ function doc(thing, timestamp, sense1, sense2) {
 
 describe(ddName, () => {
   before( async () => {
-    const server = await util.getServer();
-    const url = 'http://' + server + ddName;
+    const server = process.env.TEST_COUCHDB_ADDR;
+    const url = 'http://' + server + '/' + ddName;
     db = new util.AnonymousDB(url);
     adminDb = new util.AdminDB(url);
     await adminDb.destroy();
