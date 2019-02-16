@@ -582,7 +582,7 @@ export default {
   },
   mounted() {
     this.initialize();
-    this.$pouch.sync("idiot", "http://localhost:5984/idiot", {
+    this.$pouch.sync("idiot", process.env.VUE_APP_DB_URL, {
       selector: {
         _id: {
           $gt: "sensesWrite/"+this.thing,

@@ -16,3 +16,12 @@ before_script:
 
 services:
   - couchdb
+
+jobs:
+  include:
+    - stage: test
+      script: npm test
+    - stage: deploy
+      if: branch = master AND \
+          type != pull_request
+      script: npm run bootstrap push -- https://$DEPLOY_USER:$DEPLOY_PASSWORD@$DEPLOY_URL couchdb
