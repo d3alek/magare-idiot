@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/d3alek/magare-idiot.svg?branch=master)](https://travis-ci.com/d3alek/magare-idiot)
+
 ## Run tests
 
 ```
