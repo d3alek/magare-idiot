@@ -1,13 +1,26 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/details">Details</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/">{{$t("Home")}}</router-link> |
+      <router-link to="/details">{{$t("Details")}}</router-link> |
+      <router-link to="/about">{{$t("About")}}</router-link>
     </div>
+    <Language />
     <router-view />
   </div>
 </template>
+
+<script>
+
+import Language from "@/components/Language.vue";
+
+export default {
+  components: {
+    Language
+  }
+}
+
+</script>
 
 <style>
 #app {

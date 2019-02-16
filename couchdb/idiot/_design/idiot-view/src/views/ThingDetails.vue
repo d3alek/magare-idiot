@@ -1,26 +1,40 @@
 <template>
-  <div class="details">
-    <h3>{{ thing }}</h3>
-    <ThingStatus :state="state" />
-    <pre>{{ JSON.stringify(state, null, 2) }}</pre>
+  <div v-if="thing" class="details">
+    <div v-if="state && !Array.isArray(state)">
+      <h3>{{ thing }}</h3>
+      <Status :state="state" />
+      <History :thing="thing" />
+      <pre>{{ JSON.stringify(state, null, 2) }}</pre>
+    </div>
+    <div v-else>
+      <h3>{{ thing }} не съществува</h3>
+    </div>
+  </div>
+  <div v-else>
+    <h3>Няма избрано устройство</h3>
   </div>
 </template>
 
 <script>
-import ThingStatus from "@/components/ThingStatus.vue";
+import Status from "@/components/Status.vue";
+import History from "@/components/History.vue";
+
+import PouchDB from 'pouchdb';
 
 export default {
   name: "thing-details",
   components: {
-    //HelloWorld
-    ThingStatus
+    Status,
+    History
   },
   pouch: {
     state() {
-      return { 
-        database: 'idiot',
-        selector: {_id: this.thing},
-        first: true
+      if (this.thing) {
+        return {
+          database: "idiot",
+          selector: { _id: this.thing },
+          first: true
+        };
       }
     }
   },
@@ -30,8 +44,11 @@ export default {
     }
   },
   created: function() {
-  // Send all documents to the remote database, and stream changes in real-time. Note if you use filters you need to set them correctly for pouchdb and couchdb. You can set them for each direction separatly: options.push/options.pull. PouchDB might not need the same filter to push documents as couchdb to send the filtered requested documents.
-      this.$pouch.sync('idiot', 'http://localhost:5984/idiot', {});
-    }
+    this.$pouch.sync("idiot", "http://localhost:5984/idiot", {
+      selector: {
+        _id: this.thing
+      }
+    });
+  }
 };
 </script>

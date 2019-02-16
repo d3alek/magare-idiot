@@ -9,11 +9,7 @@ module.exports = function(newDoc, oldDoc, userCtx, secObj) {
   var deleteAction = typeof newDoc === 'undefined' || newDoc === null || newDoc._deleted === true;
 
   if (!admin && deleteAction) {
-    throw({forbidden: 'Only admins allowed to delete.'});
-  }
-
-  if (!newDoc.author || newDoc.author !== userName) {
-    throw({forbidden: 'Document author must be user.'});
+    throw({forbidden: 'Only admins allowed to delete documents.'});
   }
 
   var idiot = userCtx.roles.indexOf('idiot') !== -1;

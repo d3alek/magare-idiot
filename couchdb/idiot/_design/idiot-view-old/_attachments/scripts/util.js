@@ -21,5 +21,9 @@ function getConfig(id) {
     }
   }
 
+  if (id === 'time') {
+    config.graph = false;
+  }
+
   return config;
 }
