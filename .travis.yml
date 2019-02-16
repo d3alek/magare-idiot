@@ -1,0 +1,24 @@
+language: node_js
+node_js:
+  - "node"
+env:
+  global:
+    - TEST_COUCHDB_ADDR=localhost:5984
+    - TEST_ADMIN=test-admin
+    - TEST_ADMIN_PASSWORD=test-admin-password
+    - TEST_USER=test-user
+    - TEST_USER_PASSWORD=test-user-password
+    - ANOTHER_USER=another-user
+    - ANOTHER_USER_PASSWORD=another-user-password
+
+before_script:
+  - integration-tests/setup-couchdb.sh
+
+services:
+  - couchdb
+
+deploy: 
+  - provider: script
+    script: deploy.sh
+    on:
+      branch: master

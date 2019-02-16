@@ -1,7 +1,7 @@
 ## Run tests
 
 ```
-npm run test
+TEST_COUCHDB_ADDR=localhost:5984 npm test
 ```
 
 ## Push to CouchDB

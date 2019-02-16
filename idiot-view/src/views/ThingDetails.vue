@@ -44,7 +44,7 @@ export default {
     }
   },
   created: function() {
-    this.$pouch.sync("idiot", "http://localhost:5984/idiot", {
+    this.$pouch.sync("idiot", process.env.VUE_APP_DB_URL, {
       selector: {
         _id: this.thing
       }

@@ -17,7 +17,7 @@ function execPromise(command) {
 exports.getServer = async () => await execPromise('integration-tests/init-test-couchdb.sh');
 
 exports.putValidation = async (server, validation) => {
-  const command = 'npm run push http://test-admin:test-admin-password@'+server+validation + ' couchdb/idiot/_design/'+validation;
+  const command = 'npm run push http://test-admin:test-admin-password@'+server+'/'+validation + ' couchdb/idiot/_design/'+validation;
   await execPromise(command);
 };
 
