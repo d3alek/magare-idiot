@@ -1,6 +1,7 @@
 set -e
 
 cd idiot-view
+yarn install
 yarn build
 cp -r dist/* ../couchdb/idiot/_design/idiot-view/_attachments
 cd ..
