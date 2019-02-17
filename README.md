@@ -1,6 +1,13 @@
 [![Build Status](https://travis-ci.com/d3alek/magare-idiot.svg?branch=master)](https://travis-ci.com/d3alek/magare-idiot)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
+## Run locally
+
+```
+cd idiot-view
+yarn serve
+```
+
 ## Run tests
 
 Requirements:

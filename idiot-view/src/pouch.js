@@ -1,9 +1,8 @@
 import Vue from "vue";
 import PouchDB from "pouchdb";
-//var PouchDB = require("pouchdb");
 import find from "pouchdb-find";
 
-PouchDB.debug.enable('pouchdb-find');
+//PouchDB.debug.enable('*');
 
 PouchDB.plugin(find);
 PouchDB.plugin(require("pouchdb-live-find"));

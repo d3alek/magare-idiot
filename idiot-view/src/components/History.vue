@@ -170,7 +170,6 @@ function redraw() {
     return;
   }
   console.log('redraw');
-  console.log(this.sensesWrite);
   const vue = this;
 
   var senseColumns = [];
@@ -250,7 +249,6 @@ function redraw() {
   );
 
   var dict = { senses: senses, writes: writes };
-  console.log(dict);
   var svg = d3
     .select("#graph")
     .selectAll("svg")

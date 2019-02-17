@@ -19,8 +19,6 @@
 import Status from "@/components/Status.vue";
 import History from "@/components/History.vue";
 
-import PouchDB from 'pouchdb';
-
 export default {
   name: "thing-details",
   components: {
