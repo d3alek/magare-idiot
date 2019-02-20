@@ -1,12 +1,11 @@
 exports.state = function(doc, req) {
-  function updatedDoc(doc, body, timestamp, userName) {
+  function updatedDoc(doc, body, timestamp) {
     if (!('reported' in doc)) {
       doc.reported = {};
     }
     doc.reported.state = body
-    doc.reported.timestamp = timestamp
-    doc.author = userName;
-    return doc
+    doc.reported.timestamp = timestamp;
+    return doc;
   }
 
   function isEmpty(obj) {
@@ -100,8 +99,7 @@ exports.state = function(doc, req) {
 
   var userName = req.userCtx.name;
 
-  if (!doc) {
-    log('No matching document,  refusing report');
+  if (!userName) {
     return [null, 'KO'];
   }
 
@@ -116,6 +114,9 @@ exports.state = function(doc, req) {
 
   var timestamp = new Date().toISOString();
 
+  if (!doc) {
+    doc = {_id: req.id};
+  }
 
-  return [updatedDoc(doc, body, timestamp, userName), buildResponse(doc, body)]
+  return [updatedDoc(doc, body, timestamp), buildResponse(doc, body)]
 }

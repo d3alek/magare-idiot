@@ -9,16 +9,18 @@ const throwMessage = util.throwMessage;
 
 var db;
 var adminDb;
-var url;
+var authenticatedUrl;
 const timestamp = '2018-11-28T07:44:18.882Z';
 const thing = 'test-doc';
 
 function update(body) {
-  return fetch(url + '/_design/' + ddName + '/_update/' + updateName + '/' + thing, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: { 'Content-Type': 'application/json' }
-      });
+  return fetch(authenticatedUrl + '/_design/' + ddName + '/_update/' + updateName + '/' + thing, {
+    
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+
+  });
 }
 
 function updateConfig(config) {
@@ -51,7 +53,8 @@ function doc(reportedState, desiredConfig) {
 describe(ddName, () => {
   before( async () => {
     const server = process.env.TEST_COUCHDB_ADDR;
-    url = 'http://' + server + '/' + ddName;
+    const url = 'http://' + server + '/' + ddName;
+    authenticatedUrl = 'http://test-user:test-user-password@' + server + '/' + ddName;
     db = new util.AnonymousDB(url);
     adminDb = new util.AdminDB(url);
     await adminDb.destroy();
@@ -77,14 +80,15 @@ describe(ddName, () => {
     expect(result.rows[0].id).to.equal('_design/' + ddName);
   });
 
-  it('fail adding new thing', async () => {
+  it('succeed adding new thing', async () => {
     const body = {}
     const request = await update(body);
     expect(request.ok).to.be.true;
-    expect(await request.text()).to.equal('KO');
+    const text = (await request.text()).split('\n');
+    expect(text[1]).to.equal('{}');
 
     const response = await db.allDocs({include_docs: true, startkey: thing, endkey: thing + '{'}).catch(throwMessage);
-    expect(response.rows.length).to.equal(0);
+    expect(response.rows.length).to.equal(1);
   });
 
   it('update existing thing', async () => {

@@ -20,12 +20,16 @@ exports.senses = function(doc, req) {
   }
 
   var timestamp = new Date().toISOString();
+  var thing = doc._id.split('/')[1];
+
+  if (!thing) {
+    log('Error: Could not parse thing from doc id: ' + doc._id);
+    return [null, 'KO'];
+  }
 
   function newDoc(sensesWrite) {
     return {
-      _id: 'sensesWrite/' + doc._id + '$' + timestamp,
-      author: userName,
-      thing: doc._id,
+      _id: 'sensesWrite/' + thing + '$' + timestamp,
       timestamp: timestamp,
       senses: sensesWrite.senses,
       write: sensesWrite.write

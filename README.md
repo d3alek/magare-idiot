@@ -25,6 +25,7 @@ TEST_COUCHDB_ADDR=localhost:5984 npm test
 Rely on [commitizen](https://github.com/commitizen/cz-cli) to enforce the [Conventional Commits](https://www.conventionalcommits.org) standard on commit messages.
 
 ```
+git add .
 npm run commit
 ```
 
@@ -37,3 +38,7 @@ Manually:
 ```
 DEPLOY_USER=<deploy-user> DEPLOY_PASSWORD=<deploy-password> DEPLOY_URL=<deploy-url> ./deploy.sh
 ```
+
+## Arduino code
+
+Arduino code tested with ESP8266 (ESP12e and [Olimex MOD-WIFI](https://www.olimex.com/Products/IoT/ESP8266/MOD-WIFI-ESP8266-DEV/open-source-hardware)) is in separate repository [esp-idiot](https://github.com/d3alek/esp-idiot)
