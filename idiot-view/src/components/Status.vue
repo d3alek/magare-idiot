@@ -1,19 +1,28 @@
 <template>
-  <div class="status">
-    <h4>
+  <div class="status item">
+    <div v-if="short">
+      <span v-if="status.text" :class="status.text"/>
+    </div>
+    <div v-else>
       <span v-if="status.text" :class="status.text">{{
         localize(status.text).slice(1)
       }}</span>
       <span v-if="status.since"> от {{ status.since }}</span>
-    </h4>
+    </div>
   </div>
 </template>
 
 <script>
+const ASSUME_DOWN_AFTER_MINUTES = 5;
+
 export default {
   name: "Status",
   props: {
-    state: Object
+    state: Object,
+    short: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
     status: function() {
@@ -29,7 +38,7 @@ export default {
       var reported_utc = new Date(reported.timestamp);
       var reported_millis = reported_utc.getTime(); // enchanted utc time in millis
       var now_millis = new Date().getTime(); // current utc time in millis
-      if (now_millis - reported_millis > 5000 * 60) {
+      if (now_millis - reported_millis > ASSUME_DOWN_AFTER_MINUTES * 1000 * 60) {
         return {
           text: "down",
           since: reported_utc.toLocaleString()

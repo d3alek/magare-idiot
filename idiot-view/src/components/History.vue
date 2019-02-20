@@ -177,16 +177,22 @@ function redraw() {
   var data = this.sensesWrite.map(function(row) {
     var senses = row.senses;
     var write = row.write;
-    senseColumns = senseColumns.concat(Object.keys(senses));
+    if (senses) {
+      senseColumns = senseColumns.concat(Object.keys(senses));
+    }
     if (write) {
       writeColumns = writeColumns.concat(Object.keys(write));
     }
-    return {
-      date: moment.utc(row.timestamp),
-      senses: senses,
-      write: write
-    };
+    if (senses || write) {
+      return {
+        date: moment.utc(row.timestamp),
+        senses: senses,
+        write: write
+      };
+    }
   });
+
+  data = data.filter(d => d);
 
   senseColumns = Array.from(new Set(senseColumns));
 

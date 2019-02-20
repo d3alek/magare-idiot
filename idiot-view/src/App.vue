@@ -1,13 +1,26 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">{{$t("Home")}}</router-link> |
-      <router-link to="/details">{{$t("Details")}}</router-link> |
-      <router-link to="/about">{{$t("About")}}</router-link>
-    </div>
-    <Language />
-    <router-view />
-  </div>
+  <v-app>
+    <v-toolbar app>
+      <v-toolbar-title class="headline text-uppercase">
+        <span>Idiot</span>
+        <span class="font-weight-light">Intelligent Device IoT</span>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn router to="/">
+        {{$t("Home")}}
+      </v-btn>
+      <v-btn router to="/list">
+        {{$t("Things")}}
+      </v-btn>
+      <v-btn router to="/about">
+        {{$t("About")}}
+      </v-btn>
+      <Language />
+    </v-toolbar>
+    <v-content>
+      <router-view />
+    </v-content>
+  </v-app>
 </template>
 
 <script>

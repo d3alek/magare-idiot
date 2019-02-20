@@ -14,7 +14,8 @@ i18next.init({
         days: "дни",
         Home: 'Начало',
         Details: 'Детайли',
-        About: 'За нас'
+        About: 'За нас',
+        Things: 'Устройства'
       }
     }
   }
