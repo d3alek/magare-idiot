@@ -1,6 +1,11 @@
 language: node_js
 node_js:
   - "node"
+
+cache:
+  - npm
+  - yarn
+
 env:
   global:
     - TEST_COUCHDB_ADDR=localhost:5984
