@@ -563,7 +563,10 @@ export default {
         return {
           database: "idiot",
           selector: selector,
-          fields: ['timestamp', 'senses', 'write']
+          fields: ['timestamp', 'senses', 'write'],
+          sort: [
+            "_id"
+          ]
         }
       }
     }
@@ -592,7 +595,10 @@ export default {
           $gt: "sensesWrite/"+this.thing,
           $lt: "sensesWrite/"+this.thing+'{'
         }
-      }
+      },
+      sort: [
+        "_id"
+      ]
     }); // TODO either don't sync the whole DB or keep that db short and make another one, idiot-history for anything more than a day old
   },
   methods: {

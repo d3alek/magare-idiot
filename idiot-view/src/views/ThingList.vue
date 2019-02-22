@@ -20,13 +20,19 @@ export default {
     things() {
       return {
         database: "idiot",
-        selector: SELECTOR
+        selector: SELECTOR,
+        sort: [
+          "_id"
+        ]
       }
     }
   },
   created: function() {
     this.$pouch.sync("idiot", process.env.VUE_APP_DB_URL, {
-      selector: SELECTOR 
+      selector: SELECTOR,
+      sort: [
+        "_id"
+      ]
     });
   }
 };

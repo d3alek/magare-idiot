@@ -88,7 +88,8 @@ export default {
     this.$pouch.sync("idiot", process.env.VUE_APP_DB_URL, {
       selector:  {
         _id: 'thing/' + this.thing
-      }
+      },
+      first: true
     });
   }
 };
