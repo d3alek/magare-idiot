@@ -53,8 +53,8 @@ function doc(reportedState, desiredConfig) {
 describe(ddName, () => {
   before( async () => {
     const server = process.env.TEST_COUCHDB_ADDR;
-    const url = 'http://' + server + '/' + ddName;
-    authenticatedUrl = 'http://test-user:test-user-password@' + server + '/' + ddName;
+    const url = util.getUrl(server, ddName);
+    authenticatedUrl = util.getUrl(server, ddName, true);
     db = new util.AnonymousDB(url);
     adminDb = new util.AdminDB(url);
     await adminDb.destroy();

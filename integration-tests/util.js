@@ -14,10 +14,17 @@ function execPromise(command) {
     });
 }
 
+const getUrl = (server, ddName, authenticated) => {
+  return 'http://' + (authenticated ? 'test-admin:test-admin-password@': '') + server + '/test-' + ddName;
+}
+
 exports.getServer = async () => await execPromise('integration-tests/init-test-couchdb.sh');
 
-exports.putValidation = async (server, validation) => {
-  const command = 'npm run push http://test-admin:test-admin-password@'+server+'/'+validation + ' couchdb/idiot/_design/'+validation;
+exports.putValidation = async (server, validation, db) => {
+  if (!db) {
+    db = 'idiot'
+  }
+  const command = 'npm run push ' + getUrl(server, validation, true) + ` couchdb/${db}/_design/`+validation;
   await execPromise(command);
 };
 
@@ -50,3 +57,4 @@ exports.key = (thing, timestamp) => {
   return thing + '$' + timestamp;
 }
 
+exports.getUrl = getUrl

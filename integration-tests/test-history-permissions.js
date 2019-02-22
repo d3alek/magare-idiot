@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 const util = require('./util.js');
 
-const ddName = "idiot-permissions";
+const ddName = "history-permissions";
 
 const throwMessage = util.throwMessage;
 const logMessage = util.logMessage;
@@ -37,7 +37,7 @@ describe(ddName, () => {
     const usersUrl = 'http://' + server + '/_users';
     usersDb = new util.AdminDB(usersUrl);
 
-    await util.putValidation(server, ddName);
+    await util.putValidation(server, ddName, 'idiot-history');
   });
 
   beforeEach( async () => {
@@ -51,7 +51,6 @@ describe(ddName, () => {
       d = {}
       d._id = id;
       d._rev = docs.rows[row].value.rev;
-      d.author = 'test-admin';
       d._deleted = true;
       await adminDb.put(d);
     }
@@ -69,35 +68,17 @@ describe(ddName, () => {
     expect(response).to.be.undefined;
   });
 
-  it('authenticated not idiot not allowed to edit', async () => {
+  it('authenticated not allowed to create', async () => {
     const response = await db.put(doc()).catch(logMessage);
     expect(response).to.be.undefined;
   });
 
-  it('authenticated idiot not allowed to create', async () => {
-    await givenRole('idiot');
-    const response = await db.put(doc()).catch(logMessage);
-    expect(response).to.be.undefined;
-  });
-
-  it('authenticated idiot allowed to edit', async () => {
-    await givenRole('idiot');
-
-    const d = doc()
-    d.author = 'test-admin'
+  it('authenticated not allowed to edit', async () => {
+    var d = doc();
     const putResult = await adminDb.put(d)
-
     d._rev = putResult.rev;
-    d.author = 'test-user'
-
-    const response = await db.put(d).catch(throwMessage);
-    expect(response.ok).to.be.true;
-  });
-
-  it('authenticated idiot robot allowed to create', async () => {
-    await givenRole('idiot', 'robot');
-    const response = await db.put(doc()).catch(throwMessage);
-    expect(response.ok).to.be.true;
+    const response = await db.put(d).catch(logMessage);
+    expect(response).to.be.undefined;
   });
 });
 

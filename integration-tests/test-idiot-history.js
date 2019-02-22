@@ -27,7 +27,7 @@ function doc(thing, timestamp, sense1, sense2) {
 describe(ddName, () => {
   before( async () => {
     const server = process.env.TEST_COUCHDB_ADDR;
-    const url = 'http://' + server + '/' + ddName;
+    const url = util.getUrl(server, ddName);
     db = new util.AnonymousDB(url);
     adminDb = new util.AdminDB(url);
     await adminDb.destroy();

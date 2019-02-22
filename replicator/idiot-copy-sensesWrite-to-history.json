@@ -1,0 +1,20 @@
+{
+  "source": "http://localhost:5984/idiot",
+  "target": "http://$DEPLOY_USER:$DEPLOY_PASSWORD@localhost:5984/idiot-history",
+  "create_target": false,
+  "continuous": true,
+  "selector": {
+    "_id": {
+      "$gt": "sensesWrite/",
+      "$lt": "sensesWrite\\"
+    }
+  },
+  "user_ctx": {
+    "name": "$DEPLOY_USER",
+    "roles": [
+      "_admin",
+      "_reader",
+      "_writer" 
+    ]
+  }
+}

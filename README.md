@@ -36,7 +36,12 @@ Push to master automatically deploys to [Magare](github.com/d3alek/magare) via T
 Manually:
 
 ```
-DEPLOY_USER=<deploy-user> DEPLOY_PASSWORD=<deploy-password> DEPLOY_URL=<deploy-url> ./deploy.sh
+DEPLOY_USER=<deploy-user> DEPLOY_PASSWORD=<deploy-password> DEPLOY_HOST=<deploy-host> ./deploy.sh
+```
+The default schema is "https" so when deploying locally include `SCHEMA` variable, as well as specifying the port in `DEPLOY_HOST`:
+
+```
+DEPLOY_USER=test-admin DEPLOY_PASSWORD=test-admin-password DEPLOY_HOST=localhost:5984 SCHEMA=http ./deploy.sh
 ```
 
 ## Arduino code
