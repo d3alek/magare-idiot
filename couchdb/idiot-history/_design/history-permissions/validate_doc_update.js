@@ -4,4 +4,8 @@ module.exports = function(newDoc, oldDoc, userCtx, secObj) {
   if (!admin) {
     throw({forbidden: 'Only admins allowed to create/edit/delete documents.'});
   }
+
+  if (newDoc._deleted && !newDoc.forceDelete) {
+    throw({forbidden: 'Nobody allowed to delete history'});
+  }
 }

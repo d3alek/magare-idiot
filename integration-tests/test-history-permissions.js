@@ -5,7 +5,6 @@ const ddName = "history-permissions";
 
 const throwMessage = util.throwMessage;
 const logMessage = util.logMessage;
-
 var anonymousDb;
 var db;
 var adminDb;
@@ -52,6 +51,7 @@ describe(ddName, () => {
       d._id = id;
       d._rev = docs.rows[row].value.rev;
       d._deleted = true;
+      d.forceDelete = true;
       await adminDb.put(d);
     }
     await givenRole().catch(throwMessage);
@@ -80,5 +80,15 @@ describe(ddName, () => {
     const response = await db.put(d).catch(logMessage);
     expect(response).to.be.undefined;
   });
+
+  it('nobody allowed to delete', async () => {
+    var d = doc();
+    const putResult = await adminDb.put(d)
+    d._rev = putResult.rev;
+    d._deleted = true;
+    const response = await adminDb.put(d).catch(logMessage);
+    expect(response).to.be.undefined;
+  });
+
 });
 

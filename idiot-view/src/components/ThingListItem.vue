@@ -12,7 +12,9 @@
 </template>
 
 <script>
+import utils from "@/utils.vue";
 import Status from "@/components/Status.vue";
+
 export default {
   name: "thing-list-item",
   components: {
@@ -23,7 +25,7 @@ export default {
   },
   computed: {
     thing() {
-      return this.state._id.split('/')[1];
+      return utils.parseThing(this.state._id);
     }
   }
 }

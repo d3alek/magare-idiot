@@ -533,7 +533,8 @@ const dateTypes = ["minutes", "hours", "days"];
 export default {
   name: "History",
   props: {
-    thing: String
+    thing: String,
+    pullRequestHandler: Function
   },
   data() {
     return {
@@ -553,9 +554,10 @@ export default {
     sensesWrite() {
       if (this.thing) {
         var selector = {
-            _id: {
-              $gt: "sensesWrite/"+this.thing+'$'+this.fromDate.format()
-            }
+          _id: {
+            $gt: "sensesWrite/"+this.thing+'$'+this.fromDate.format(),
+            $lt: "sensesWrite/"+this.thing+'{'
+          }
         }
         if (this.to.number !== 0) {
           selector._id.$lt = "sensesWrite/"+this.thing+'$'+this.toDate.format();
@@ -589,7 +591,7 @@ export default {
   },
   mounted() {
     this.initialize();
-    this.$pouch.sync("idiot", process.env.VUE_APP_DB_URL, {
+    const options = {
       selector: {
         _id: {
           $gt: "sensesWrite/"+this.thing,
@@ -598,8 +600,11 @@ export default {
       },
       sort: [
         "_id"
-      ]
-    }); // TODO either don't sync the whole DB or keep that db short and make another one, idiot-history for anything more than a day old
+      ],
+      live: true,
+      retry: true
+    };
+    this.pullRequestHandler("history", options);
   },
   methods: {
     initialize: initialize,

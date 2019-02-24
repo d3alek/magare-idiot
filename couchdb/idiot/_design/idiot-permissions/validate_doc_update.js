@@ -2,6 +2,16 @@ module.exports = function(newDoc, oldDoc, userCtx, secObj) {
   var userName = userCtx.name;
 
   if (!userName) {
+    if (
+      newDoc._deleted &&
+      oldDoc._id.lastIndexOf("sensesWrite", 0) === 0) {
+      function twoDaysAgo() {
+        return new Date((new Date()).getTime() - 1000*60*24*2).toISOString();
+      }
+      if (oldDoc.timestamp < twoDaysAgo()) {
+        return;
+      }
+    }
     throw({forbidden: 'Anonymous not allowed to edit documents.'});
   }
 

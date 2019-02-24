@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 const util = require('./util.js');
+const moment = require('moment');
 
 const ddName = "idiot-permissions";
 
@@ -11,8 +12,17 @@ var db;
 var adminDb;
 var usersDb;
 
-function doc() {
-  return {_id: 'test-doc'};
+function doc(_id, timestamp) {
+  if (!_id) {
+    _id = 'test-doc'
+  }
+  if (!timestamp) {
+    timestamp = moment.utc().format()
+  }
+  return {
+    _id: _id,
+    timestamp: timestamp
+  };
 }
 
 async function givenRole(...roleNames) {
@@ -66,6 +76,39 @@ describe(ddName, () => {
 
   it('anonymous not allowed to create', async () => {
     const response = await anonymousDb.put(doc()).catch(logMessage);
+    expect(response).to.be.undefined;
+  });
+
+  it('anonymous allowed to delete old sensesWrite', async () => {
+    const d = doc('sensesWrite/', moment().utc().subtract(2, 'days'))
+    const putResult = await adminDb.put(d)
+
+    d._rev = putResult.rev;
+    d._deleted = true;
+
+    const response = await anonymousDb.put(d).catch(throwMessage);
+    expect(response.ok).to.be.true;
+  });
+
+  it('anonymous not allowed to delete recent sensesWrite', async () => {
+    const d = doc('sensesWrite/')
+    const putResult = await adminDb.put(d)
+
+    d._rev = putResult.rev;
+    d._deleted = true;
+
+    const response = await anonymousDb.put(d).catch(logMessage);
+    expect(response).to.be.undefined;
+  });
+
+  it('anonymous not allowed to delete old things', async () => {
+    const d = doc('thing/')
+    const putResult = await adminDb.put(d)
+
+    d._rev = putResult.rev;
+    d._deleted = true;
+
+    const response = await anonymousDb.put(d).catch(logMessage);
     expect(response).to.be.undefined;
   });
 

@@ -15,7 +15,7 @@
           </v-treeview>
         </v-flex>
         <v-flex xs12>
-          <History :thing="thing" />
+          <History :thing="thing" :pullRequestHandler="pullRequestHandler" />
         </v-flex>
       </span>
       <span v-else>
@@ -63,6 +63,9 @@ export default {
     Status,
     History
   },
+  props: {
+    pullRequestHandler: Function
+  },
   pouch: {
     state() {
       if (this.thing) {
@@ -85,7 +88,7 @@ export default {
     }
   },
   created: function() {
-    this.$pouch.sync("idiot", process.env.VUE_APP_DB_URL, {
+    this.$pouch.pull("idiot", process.env.VUE_APP_DB_URL, {
       selector:  {
         _id: 'thing/' + this.thing
       },
