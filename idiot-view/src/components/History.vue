@@ -604,7 +604,7 @@ export default {
       live: true,
       retry: true
     };
-    this.pullRequestHandler("history", options);
+    this.pullRequestHandler("idiot", options);
   },
   methods: {
     initialize: initialize,

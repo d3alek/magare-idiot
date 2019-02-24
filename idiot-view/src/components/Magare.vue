@@ -28,6 +28,15 @@
               </v-list-tile-action>
               <v-list-tile-title>Housekeeping</v-list-tile-title>
             </v-list-tile>
+            <v-list-tile v-for="(state, db) in livePullStates" :key="db">
+              <v-list-tile-action>
+                <v-btn flat icon
+                  :loading="state.active">
+                  <v-icon>{{state.active ? "active" : "done"}}</v-icon>
+                </v-btn>
+              </v-list-tile-action>
+              <v-list-tile-title>{{db}}</v-list-tile-title>
+            </v-list-tile>
           </v-list>
         </v-menu>
       </v-flex>
@@ -55,38 +64,6 @@ export default {
     things: Array,
     pullRequests: Object
   },
-  watch: {
-    pullRequests: {
-      handler: function(pullRequests) {
-        var pull;
-        const existingPulls = _.intersection(Object.keys(pullRequests), Object.keys(this.activePulls));
-        for (pull of existingPulls) {
-          console.log(`restart pull ${pull}`);
-          this.activePulls.pull.cancel();
-          this.activePulls.pull = this.$pouch.pull("idiot", REMOTE_DB, pullRequests.pull)
-        }
-
-        const newPulls = _.difference(Object.keys(pullRequests), Object.keys(this.activePulls));
-
-        for (pull of newPulls) {
-          console.log(`start pull ${pull}`);
-          this.activePulls[pull] = this.$pouch.pull("idiot", REMOTE_DB, pullRequests.pull)
-        }
-
-        const removedPulls = _.difference(Object.keys(this.activePulls), Object.keys(pullRequests));
-
-        for (pull of removedPulls) {
-          console.log(`stop pull ${pull}`);
-          this.activePulls.pull.cancel;
-          delete this.activePulls.pull;
-        }
-      },
-      deep: true
-    },
-    things: function (val) {return this.findOld},
-    oldSensesWrite: function (val) { return this.performHousekeeping()},
-    housekeeper: function (val) { return this.findOld()}
-  },
   data() {
     return {
       height: "30px",
@@ -94,13 +71,87 @@ export default {
       loading: false,
       oldSensesWrite: [],
       housekeeper: false,
-      activePulls: {}
+      livePulls: {},
+      livePullStates: {},
     }
+  },
+  watch: {
+    pullRequests: {
+      handler: function(e) {this.updatePullRequests(e)},
+      deep: true
+    },
+    things: function (val) {return this.findOld},
+    oldSensesWrite: function (val) { return this.performHousekeeping()},
+    housekeeper: function (val) { return this.findOld()}
   },
   mounted() {
     this.findOld();
   },
+  created() {
+    this.$on('pouchdb-pull-active', (e) => {
+      this.updatePullState(e);
+    });
+    this.$on('pouchdb-pull-paused', (e) => {
+      this.updatePullState(e);
+    });
+    this.$on('pouchdb-pull-change', (e) => {
+      this.updatePullState(e);
+    });
+  },
   methods: {
+    updatePullState: function(e) {
+      var state = this.livePullStates[e.db];
+      if (!state) {
+        state = {};
+      }
+
+      if (e.active) {
+        state.active = true;
+        state.paused = false;
+      }
+      else if (e.paused) {
+        state.active = false;
+        state.paused = true;
+      }
+      else if (e.info) {
+        if (!state.docs_written) {
+          state.docsWritten = 0;
+        }
+        state.docsWritten += e.info.docs_written;
+      }
+      else {
+        console.error("cannot handle event");
+        console.error(e);
+      }
+      this.$set(this.livePullStates, e.db, state);
+    },
+    updatePullRequests: function(pullRequests) {
+      var pull, newPull;
+      const existingPulls = _.intersection(Object.keys(pullRequests), Object.keys(this.livePulls));
+      for (pull of existingPulls) {
+        console.log(`restart pull ${pull}`);
+        this.livePulls[pull].cancel();
+        this.$set(this.livePulls, pull, this.$pouch.pull("idiot", REMOTE_DB, pullRequests[pull]));
+        this.updatePullState({paused: true, db: pull});
+      }
+
+      const newPulls = _.difference(Object.keys(pullRequests), Object.keys(this.livePulls));
+
+      for (pull of newPulls) {
+        console.log(`start pull ${pull}`);
+        this.$set(this.livePulls, pull, this.$pouch.pull("idiot", REMOTE_DB, pullRequests[pull]));
+        this.updatePullState({paused: true, db: pull});
+      }
+
+      const removedPulls = _.difference(Object.keys(this.livePulls), Object.keys(pullRequests));
+
+      for (pull of removedPulls) {
+        console.log(`stop pull ${pull}`);
+        this.livePulls[pull].live.cancel();
+        this.$delete(this.livePulls, pull);
+        this.$delete(this.livePullStates, pull);
+      }
+    },
     performHousekeeping: function() {
       if (!this.housekeeper || this.oldSensesWrite.length === 0) {
         return;
