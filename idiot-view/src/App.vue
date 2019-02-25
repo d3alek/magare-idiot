@@ -29,8 +29,9 @@
 import Language from "@/components/Language.vue";
 import Magare from "@/components/Magare.vue";
 
+const DB = "idiot-things";
 const SELECTOR = {
-  database: "idiot",
+  database: DB,
   selector: {
     _id: {
       $gt: "thing/",
@@ -59,12 +60,13 @@ export default {
     }
   },
   created: function() {
-    this.$pouch.pull("idiot", process.env.VUE_APP_DB_URL, {
+    const options = {
       selector: SELECTOR.selector,
       sort: SELECTOR.sort,
       live: true,
       retry: true
-    });
+    }
+    this.pullRequestHandler(DB, options);
   },
   methods: {
     pullRequestHandler(toDatabase, options) {

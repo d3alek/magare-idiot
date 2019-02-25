@@ -64,9 +64,7 @@ export default {
       fillColor: "gray",
       loading: false,
       oldSensesWrite: [],
-      housekeeper: false,
-      livePulls: {},
-      livePullStates: {},
+      housekeeper: false
     }
   },
   watch: {
@@ -109,33 +107,6 @@ export default {
         console.error(e);
       }
       this.$set(this.livePullStates, e.db, state);
-    },
-    updatePullRequests: function(pullRequests) {
-      var pull, newPull;
-      const existingPulls = _.intersection(Object.keys(pullRequests), Object.keys(this.livePulls));
-      for (pull of existingPulls) {
-        console.log(`restart pull ${pull}`);
-        this.livePulls[pull].cancel();
-        this.$set(this.livePulls, pull, this.$pouch.pull("idiot", REMOTE_DB, pullRequests[pull]));
-        this.updatePullState({paused: true, db: pull});
-      }
-
-      const newPulls = _.difference(Object.keys(pullRequests), Object.keys(this.livePulls));
-
-      for (pull of newPulls) {
-        console.log(`start pull ${pull}`);
-        this.$set(this.livePulls, pull, this.$pouch.pull("idiot", REMOTE_DB, pullRequests[pull]));
-        this.updatePullState({paused: true, db: pull});
-      }
-
-      const removedPulls = _.difference(Object.keys(this.livePulls), Object.keys(pullRequests));
-
-      for (pull of removedPulls) {
-        console.log(`stop pull ${pull}`);
-        this.livePulls[pull].live.cancel();
-        this.$delete(this.livePulls, pull);
-        this.$delete(this.livePullStates, pull);
-      }
     },
     performHousekeeping: function() {
       if (!this.housekeeper || this.oldSensesWrite.length === 0) {

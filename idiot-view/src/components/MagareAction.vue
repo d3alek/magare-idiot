@@ -22,7 +22,8 @@ export default {
   },
   data() {
     return {
-      events: [{paused: true, db: this.toDatabase}]
+      events: [{paused: true, db: this.toDatabase}],
+      pull: null
     }
   },
   computed: {
@@ -36,7 +37,13 @@ export default {
       return this.latestEvent.db;
     },
     docsWritten() {
-      return this.events.reduce((partial_sum, a) => partial_sum + (a.info ? a.info.docs_written : 0), 0);
+      for (var i = this.events.length-1; i >= 0; --i) {
+        if (this.events[i].info) {
+          return this.events[i].info.docs_written;
+        }
+      }
+
+      return 0;
     }
   },
   created() {

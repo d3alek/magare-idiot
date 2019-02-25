@@ -563,7 +563,7 @@ export default {
           selector._id.$lt = "sensesWrite/"+this.thing+'$'+this.toDate.format();
         }
         return {
-          database: "idiot",
+          database: this.db,
           selector: selector,
           fields: ['timestamp', 'senses', 'write'],
           sort: [
@@ -574,6 +574,28 @@ export default {
     }
   },
   computed: {
+    db() {
+      const db = this.thing ? `idiot-${this.thing}-recent` : null;
+
+      if (db) {
+        const options = {
+          selector: {
+            _id: {
+              $gt: "sensesWrite/"+this.thing,
+              $lt: "sensesWrite/"+this.thing+'{'
+            }
+          },
+          sort: [
+            "_id"
+          ],
+          live: true,
+          retry: true
+        };
+        this.pullRequestHandler(db, options);
+      }
+
+      return db;
+    },
     fromDate() {
       return moment()
         .utc()
@@ -591,20 +613,6 @@ export default {
   },
   mounted() {
     this.initialize();
-    const options = {
-      selector: {
-        _id: {
-          $gt: "sensesWrite/"+this.thing,
-          $lt: "sensesWrite/"+this.thing+'{'
-        }
-      },
-      sort: [
-        "_id"
-      ],
-      live: true,
-      retry: true
-    };
-    this.pullRequestHandler("idiot", options);
   },
   methods: {
     initialize: initialize,
