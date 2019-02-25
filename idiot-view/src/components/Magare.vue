@@ -28,7 +28,7 @@
               </v-list-tile-action>
               <v-list-tile-title>Housekeeping</v-list-tile-title>
             </v-list-tile>
-            <magare-action v-for="(action, db) in pullRequests" :key="db" :action="action" :toDatabase="db"/>
+            <magare-db v-for="db in dbs" :key="db" :name="db" :pullOptions="pullRequests[db]"/>
           </v-list>
         </v-menu>
       </v-flex>
@@ -41,8 +41,9 @@
 import moment from "moment";
 import _ from "underscore";
 import MagarePath from "@/components/MagarePath.vue";
-import MagareAction from "@/components/MagareAction.vue";
+import MagareDb from "@/components/MagareDb.vue";
 import utils from "@/utils.vue";
+import PouchDB from "pouchdb";
 
 const REMOTE_DB = process.env.VUE_APP_DB_URL
 const COLOR_ERROR = 'red';
@@ -52,7 +53,7 @@ export default {
   name: "Magare",
   components: {
     MagarePath,
-    MagareAction
+    MagareDb
   },
   props: {
     things: Array,
@@ -64,14 +65,11 @@ export default {
       fillColor: "gray",
       loading: false,
       oldSensesWrite: [],
-      housekeeper: false
+      housekeeper: false,
+      dbs: []
     }
   },
   watch: {
-    //pullRequests: {
-    //  handler: function(e) {this.updatePullRequests(e)},
-    //  deep: true
-    //},
     things: function (val) {return this.findOld},
     oldSensesWrite: function (val) { return this.performHousekeeping()},
     housekeeper: function (val) { return this.findOld()}
@@ -80,33 +78,21 @@ export default {
     this.findOld();
   },
   created() {
+    this.refreshDbs();
+
+    PouchDB.on('created', (e) => {
+      this.refreshDbs();
+    });
+
+    PouchDB.on('destroyed', (e) => {
+      this.refreshDbs();
+    });
   },
   methods: {
-    updatePullState: function(e) {
-      var state = this.livePullStates[e.db];
-      if (!state) {
-        state = {};
-      }
-
-      if (e.active) {
-        state.active = true;
-        state.paused = false;
-      }
-      else if (e.paused) {
-        state.active = false;
-        state.paused = true;
-      }
-      else if (e.info) {
-        if (!state.docs_written) {
-          state.docsWritten = 0;
-        }
-        state.docsWritten += e.info.docs_written;
-      }
-      else {
-        console.error("cannot handle event");
-        console.error(e);
-      }
-      this.$set(this.livePullStates, e.db, state);
+    refreshDbs: function() {
+      PouchDB.allDbs().then( dbs => {
+        this.dbs = dbs;
+      });
     },
     performHousekeeping: function() {
       if (!this.housekeeper || this.oldSensesWrite.length === 0) {

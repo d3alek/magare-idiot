@@ -1,8 +1,4 @@
 set -e
-if [ -z "$SCHEMA" ];
-then
-SCHEMA="https"
-fi
 
 echo
 echo "*** Build idiot-view ***"
