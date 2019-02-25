@@ -28,15 +28,7 @@
               </v-list-tile-action>
               <v-list-tile-title>Housekeeping</v-list-tile-title>
             </v-list-tile>
-            <v-list-tile v-for="(state, db) in livePullStates" :key="db">
-              <v-list-tile-action>
-                <v-btn flat icon
-                  :loading="state.active">
-                  <v-icon>{{state.active ? "active" : "done"}}</v-icon>
-                </v-btn>
-              </v-list-tile-action>
-              <v-list-tile-title>{{db}}</v-list-tile-title>
-            </v-list-tile>
+            <magare-action v-for="(action, db) in pullRequests" :key="db" :action="action" :toDatabase="db"/>
           </v-list>
         </v-menu>
       </v-flex>
@@ -49,6 +41,7 @@
 import moment from "moment";
 import _ from "underscore";
 import MagarePath from "@/components/MagarePath.vue";
+import MagareAction from "@/components/MagareAction.vue";
 import utils from "@/utils.vue";
 
 const REMOTE_DB = process.env.VUE_APP_DB_URL
@@ -58,7 +51,8 @@ const COLOR_CONNECTED = 'green';
 export default {
   name: "Magare",
   components: {
-    MagarePath
+    MagarePath,
+    MagareAction
   },
   props: {
     things: Array,
@@ -76,10 +70,10 @@ export default {
     }
   },
   watch: {
-    pullRequests: {
-      handler: function(e) {this.updatePullRequests(e)},
-      deep: true
-    },
+    //pullRequests: {
+    //  handler: function(e) {this.updatePullRequests(e)},
+    //  deep: true
+    //},
     things: function (val) {return this.findOld},
     oldSensesWrite: function (val) { return this.performHousekeeping()},
     housekeeper: function (val) { return this.findOld()}
@@ -88,15 +82,6 @@ export default {
     this.findOld();
   },
   created() {
-    this.$on('pouchdb-pull-active', (e) => {
-      this.updatePullState(e);
-    });
-    this.$on('pouchdb-pull-paused', (e) => {
-      this.updatePullState(e);
-    });
-    this.$on('pouchdb-pull-change', (e) => {
-      this.updatePullState(e);
-    });
   },
   methods: {
     updatePullState: function(e) {

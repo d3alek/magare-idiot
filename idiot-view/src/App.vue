@@ -69,7 +69,7 @@ export default {
   methods: {
     pullRequestHandler(toDatabase, options) {
       if (this.pullRequests[toDatabase]) {
-        console.error("Multiple pull requests to the same databvase are not supported yet!");
+        console.error("Multiple pull requests to the same database are not supported yet!");
       }
       this.$set(this.pullRequests, toDatabase, options);
     }
