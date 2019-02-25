@@ -1,6 +1,6 @@
 {
-  "source": "http://localhost:5984/idiot",
-  "target": "http://$DEPLOY_USER:$DEPLOY_PASSWORD@localhost:5984/idiot-history",
+  "source": "$SCHEMA://$DEPLOY_USER:$DEPLOY_PASSWORD@$DEPLOY_HOST/idiot",
+  "target": "$SCHEMA://$DEPLOY_USER:$DEPLOY_PASSWORD@$DEPLOY_HOST/idiot-history",
   "create_target": false,
   "continuous": true,
   "selector": {

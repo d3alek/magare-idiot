@@ -18,7 +18,7 @@ echo
 echo "*** Substitute secrets into replicator document ***"
 echo
 
-envsubst '$DEPLOY_USER $DEPLOY_PASSWORD' < replicator/idiot-copy-sensesWrite-to-history.json > couchdb/_replicator/idiot-copy-sensesWrite-to-history.json
+envsubst '$DEPLOY_USER $DEPLOY_PASSWORD $DEPLOY_HOST $SCHEMA' < replicator/idiot-copy-sensesWrite-to-history.json > couchdb/_replicator/idiot-copy-sensesWrite-to-history.json
 
 echo
 echo "*** Push magare-idiot to $DEPLOY_HOST ***"
