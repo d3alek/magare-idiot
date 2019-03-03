@@ -1,16 +1,74 @@
 <template>
   <v-list-tile>
-    <v-list-tile-action>
+    <v-list-tile-avatar>
       <v-btn flat icon
         :loading="active">
         <v-icon>{{active ? "active" : (paused ? "done" : "")}}</v-icon>
       </v-btn>
+    </v-list-tile-avatar>
+    <v-list-tile-content>
+      <v-list-tile-title>
+        {{name}}
+      </v-list-tile-title>
+    </v-list-tile-content>
+    <v-list-tile-action>
+      <v-dialog
+        v-model="dialog"
+        width="500"
+        >
+        <v-btn flat icon
+          slot="activator"
+          >
+          <v-icon>info</v-icon>
+        </v-btn>
+        <v-card>
+          <v-card-title
+            class="headline grey lighten-2"
+            primary-title
+            >
+            {{name}}
+          </v-card-title>
+          <v-card-text>
+            {{active ? "Active" : "Paused"}} 
+            <br>
+            Total Docs: {{totalDocs}}
+            <br>
+            Docs Written this session: {{docsWritten}}
+            <v-data-table
+              :headers="headers"
+              :items="events"
+              >
+              <template slot="items" slot-scope="props">
+                <td>{{props.item.at.fromNow()}}</td>
+                <td class="preview">{{props.item.data}}</td>
+              </template>
+            </v-data-table>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              color="primary"
+              flat
+              @click="dialog = false"
+              >
+              Dismiss
+            </v-btn>
+            <v-btn
+              color="red"
+              flat
+              @click="deleteDb"
+              >
+              Delete
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-list-tile-action>
-    <v-list-tile-title>{{this.name}}</v-list-tile-title>
   </v-list-tile>
 </template>
 
 <script>
+
+import moment from "moment";
 
 const REMOTE_DB = process.env.VUE_APP_DB_URL
 
@@ -23,12 +81,26 @@ export default {
   data() {
     return {
       events: [],
+      dialog: false,
+      headers: [
+        {
+          text: "at",
+          align: 'left',
+          sortable: true,
+          value: "at"
+        },
+        {
+          text: "data",
+          align: 'left',
+          sortable: false,
+          value: "data"
+        }
+      ]
     }
   },
   computed: {
-    latestEvent() {
-      if (this.events.length) {
-        return this.events[this.events.length-1];
+    latestEvent() { if (this.events.length) {
+        return this.events[this.events.length-1].data;
       }
       else {
         return {};
@@ -43,7 +115,7 @@ export default {
     docsWritten() {
       for (var i = this.events.length-1; i >= 0; --i) {
         if (this.events[i].info) {
-          return this.events[i].info.docs_written;
+          return this.events[i].data.info.docs_written;
         }
       }
 
@@ -51,21 +123,31 @@ export default {
     }
   },
   created() {
+    const makeEvent = (d) => {
+      return {
+        at: moment.utc(),
+        data: d
+      };
+    };
     this.$on('pouchdb-db-created', (e) => {
-      this.events.push({created:true});
+      this.events.push(makeEvent({created:true}));
     });
     this.$on('pouchdb-pull-active', (e) => {
-      this.events.push(e);
+      this.events.push(makeEvent(e));
     });
     this.$on('pouchdb-pull-paused', (e) => {
-      this.events.push(e);
+      this.events.push(makeEvent(e));
     });
     this.$on('pouchdb-pull-change', (e) => {
-      this.events.push(e);
+      this.events.push(makeEvent(e));
     });
     this.startPull();
   },
   methods: {
+    deleteDb() {
+      this.$pouch.destroy(this.name);
+      this.dialog = false;
+    },
     startPull() {
       if (this.pull) {
         console.log(`cancel old pull ${this.name} as pull options changed`);
@@ -82,3 +164,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.preview {
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>
