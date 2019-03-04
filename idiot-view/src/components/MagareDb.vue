@@ -31,7 +31,7 @@
           <v-card-text>
             {{active ? "Active" : "Paused"}} 
             <br>
-            Total Docs: {{totalDocs}}
+            Total Docs: {{docCount}}
             <br>
             Docs Written this session: {{docsWritten}}
             <v-data-table
@@ -82,6 +82,7 @@ export default {
     return {
       events: [],
       dialog: false,
+      docCount: null,
       headers: [
         {
           text: "at",
@@ -114,7 +115,7 @@ export default {
     },
     docsWritten() {
       for (var i = this.events.length-1; i >= 0; --i) {
-        if (this.events[i].info) {
+        if (this.events[i].data.info) {
           return this.events[i].data.info.docs_written;
         }
       }
@@ -142,10 +143,16 @@ export default {
       this.events.push(makeEvent(e));
     });
     this.startPull();
+    this.loadInfo();
   },
   methods: {
+    loadInfo() {
+      this.$pouch.info(this.name).then( (r) =>
+        this.docCount = r.doc_count
+      );
+    },
     deleteDb() {
-      this.$pouch.destroy(this.name);
+      this.$pouch.destroy(this.name); // TODO do a then/catch
       this.dialog = false;
     },
     startPull() {
