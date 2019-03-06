@@ -28,6 +28,7 @@
               </v-list-tile-action>
               <v-list-tile-title>Housekeeping</v-list-tile-title>
             </v-list-tile>
+            <magare-db v-for="db in dbs" :key="db" :name="db" :pullOptions="pullRequests[db]"/>
           </v-list>
         </v-menu>
       </v-flex>
@@ -40,7 +41,9 @@
 import moment from "moment";
 import _ from "underscore";
 import MagarePath from "@/components/MagarePath.vue";
+import MagareDb from "@/components/MagareDb.vue";
 import utils from "@/utils.vue";
+import PouchDB from "pouchdb";
 
 const REMOTE_DB = process.env.VUE_APP_DB_URL
 const COLOR_ERROR = 'red';
@@ -49,43 +52,12 @@ const COLOR_CONNECTED = 'green';
 export default {
   name: "Magare",
   components: {
-    MagarePath
+    MagarePath,
+    MagareDb
   },
   props: {
     things: Array,
     pullRequests: Object
-  },
-  watch: {
-    pullRequests: {
-      handler: function(pullRequests) {
-        var pull;
-        const existingPulls = _.intersection(Object.keys(pullRequests), Object.keys(this.activePulls));
-        for (pull of existingPulls) {
-          console.log(`restart pull ${pull}`);
-          this.activePulls.pull.cancel();
-          this.activePulls.pull = this.$pouch.pull("idiot", REMOTE_DB, pullRequests.pull)
-        }
-
-        const newPulls = _.difference(Object.keys(pullRequests), Object.keys(this.activePulls));
-
-        for (pull of newPulls) {
-          console.log(`start pull ${pull}`);
-          this.activePulls[pull] = this.$pouch.pull("idiot", REMOTE_DB, pullRequests.pull)
-        }
-
-        const removedPulls = _.difference(Object.keys(this.activePulls), Object.keys(pullRequests));
-
-        for (pull of removedPulls) {
-          console.log(`stop pull ${pull}`);
-          this.activePulls.pull.cancel;
-          delete this.activePulls.pull;
-        }
-      },
-      deep: true
-    },
-    things: function (val) {return this.findOld},
-    oldSensesWrite: function (val) { return this.performHousekeeping()},
-    housekeeper: function (val) { return this.findOld()}
   },
   data() {
     return {
@@ -94,13 +66,34 @@ export default {
       loading: false,
       oldSensesWrite: [],
       housekeeper: false,
-      activePulls: {}
+      dbs: []
     }
+  },
+  watch: {
+    things: function (val) {return this.findOld},
+    oldSensesWrite: function (val) { return this.performHousekeeping()},
+    housekeeper: function (val) { return this.findOld()}
   },
   mounted() {
     this.findOld();
   },
+  created() {
+    this.refreshDbs();
+
+    PouchDB.on('created', (e) => {
+      this.refreshDbs();
+    });
+
+    PouchDB.on('destroyed', (e) => {
+      this.refreshDbs();
+    });
+  },
   methods: {
+    refreshDbs: function() {
+      PouchDB.allDbs().then( dbs => {
+        this.dbs = dbs;
+      });
+    },
     performHousekeeping: function() {
       if (!this.housekeeper || this.oldSensesWrite.length === 0) {
         return;

@@ -57,6 +57,8 @@ function transform(el) {
   return transformed;
 }
 
+const DB = "idiot-things";
+
 export default {
   name: "thing-details",
   components: {
@@ -70,7 +72,7 @@ export default {
     state() {
       if (this.thing) {
         return {
-          database: "idiot",
+          database: DB,
           selector: {
             _id: 'thing/' + this.thing
           },
@@ -87,13 +89,5 @@ export default {
       return [transform(this.state.reported.state.config)];
     }
   },
-  created: function() {
-    this.$pouch.pull("idiot", process.env.VUE_APP_DB_URL, {
-      selector:  {
-        _id: 'thing/' + this.thing
-      },
-      first: true
-    });
-  }
 };
 </script>

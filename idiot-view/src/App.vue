@@ -29,8 +29,9 @@
 import Language from "@/components/Language.vue";
 import Magare from "@/components/Magare.vue";
 
+const DB = "idiot-things";
 const SELECTOR = {
-  database: "idiot",
+  database: DB,
   selector: {
     _id: {
       $gt: "thing/",
@@ -59,16 +60,20 @@ export default {
     }
   },
   created: function() {
-    this.$pouch.pull("idiot", process.env.VUE_APP_DB_URL, {
+    const options = {
       selector: SELECTOR.selector,
       sort: SELECTOR.sort,
       live: true,
       retry: true
-    });
+    }
+    this.pullRequestHandler(DB, options);
   },
   methods: {
-    pullRequestHandler(requester, options) {
-      this.$set(this.pullRequests, requester, options);
+    pullRequestHandler(toDatabase, options) {
+      if (this.pullRequests[toDatabase]) {
+        console.error("Multiple pull requests to the same database are not supported yet!");
+      }
+      this.$set(this.pullRequests, toDatabase, options);
     }
   }
 }

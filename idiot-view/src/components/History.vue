@@ -1,7 +1,6 @@
 <template>
   <div class="history">
     {{sensesWrite ? sensesWrite.length: "??"}}
-    {{test}}
     <div id="graph"></div>
     <button @click="(from.number = 1), (from.type = 'hours')">
       Час
@@ -528,6 +527,7 @@ function parseValue(s) {
   }
 }
 
+const REMOTE_DB = process.env.VUE_APP_DB_URL + '-history';
 const dateTypes = ["minutes", "hours", "days"];
 
 export default {
@@ -547,11 +547,16 @@ export default {
         type: "minutes"
       },
       config: {},
-      dateTypes: dateTypes
-    };
+      dateTypes: dateTypes,
+      oldSensesWrite: [],
+      recentSensesWrite: []
+    }
   },
   pouch: {
-    sensesWrite() {
+    recentSensesWrite() {
+      if (this.toDate < this.twoDaysAgo()) {
+        return [];
+      }
       if (this.thing) {
         var selector = {
           _id: {
@@ -563,7 +568,36 @@ export default {
           selector._id.$lt = "sensesWrite/"+this.thing+'$'+this.toDate.format();
         }
         return {
-          database: "idiot",
+          database: this.db,
+          selector: selector,
+          fields: ['timestamp', 'senses', 'write'],
+          sort: [
+            "_id"
+          ]
+        }
+      }
+    },
+    oldSensesWrite() {
+      const twoDaysAgo = this.twoDaysAgo();
+      if (this.fromDate > twoDaysAgo) {
+        return [];
+      }
+      if (this.thing) {
+        var selector = {
+          _id: {
+            $gt: "sensesWrite/"+this.thing+'$'+this.fromDate.format(),
+            $lt: "sensesWrite/"+this.thing+'{'
+          }
+        }
+        var toDate = this.toDate;
+        if (toDate > twoDaysAgo) {
+          toDate = twoDaysAgo;
+        }
+
+        selector._id.$lt = "sensesWrite/"+this.thing+'$'+toDate.format();
+
+        return {
+          database: REMOTE_DB,
           selector: selector,
           fields: ['timestamp', 'senses', 'write'],
           sort: [
@@ -572,8 +606,34 @@ export default {
         }
       }
     }
+
   },
   computed: {
+    sensesWrite() {
+      return this.oldSensesWrite.concat(this.recentSensesWrite);
+    },
+    db() {
+      const db = this.thing ? `idiot-${this.thing}-recent` : null;
+
+      if (db) {
+        const options = {
+          selector: {
+            _id: {
+              $gt: "sensesWrite/"+this.thing,
+              $lt: "sensesWrite/"+this.thing+'{'
+            }
+          },
+          sort: [
+            "_id"
+          ],
+          live: true,
+          retry: true
+        };
+        this.pullRequestHandler(db, options);
+      }
+
+      return db;
+    },
     fromDate() {
       return moment()
         .utc()
@@ -583,30 +643,22 @@ export default {
       return moment()
         .utc()
         .subtract(this.to.number, this.to.type);
-    },
-    test() {
-      this.redraw();
     }
-
   },
-  mounted() {
+  watch: {
+    sensesWrite: function(val) {
+      this.redraw();
+    },
+  },
+  created() {
     this.initialize();
-    const options = {
-      selector: {
-        _id: {
-          $gt: "sensesWrite/"+this.thing,
-          $lt: "sensesWrite/"+this.thing+'{'
-        }
-      },
-      sort: [
-        "_id"
-      ],
-      live: true,
-      retry: true
-    };
-    this.pullRequestHandler("history", options);
   },
   methods: {
+    twoDaysAgo: function() {
+      return moment()
+        .utc()
+        .subtract(2, "days");
+    },
     initialize: initialize,
     redraw: redraw,
     quote: function quote(s) {
