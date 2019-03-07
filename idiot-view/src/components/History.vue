@@ -621,6 +621,9 @@ export default {
             _id: {
               $gt: "sensesWrite/"+this.thing,
               $lt: "sensesWrite/"+this.thing+'{'
+            },
+            _deleted: {
+              $exists: false
             }
           },
           sort: [
