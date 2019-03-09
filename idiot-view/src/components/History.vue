@@ -1,7 +1,8 @@
 <template>
   <div class="history">
     {{sensesWrite ? sensesWrite.length: "??"}}
-    <div id="graph"></div>
+    <div id="graph">
+    </div>
     <button @click="(from.number = 1), (from.type = 'hours')">
       Час
     </button>
@@ -32,21 +33,6 @@ import * as d3 from "d3";
 
 function initialize() {
   const vue = this;
-  this.margin = { top: 20, right: 80, bottom: 30, left: 80 };
-  this.width = 960 - this.margin.left - this.margin.right;
-  (this.height = 500 - this.margin.top - this.margin.bottom),
-    (this.writes_height = 50),
-    (this.senses_height = this.height - this.writes_height);
-  this.green = "#4CAF50";
-
-  this.timeformat = d3.timeFormat("%H:%M");
-
-  this.x = d3.scaleTime().range([0, this.width]);
-  this.numbers_y = d3.scaleLinear().range([this.senses_height / 2, 0]);
-  this.percents_y = d3
-    .scaleLinear()
-    .range([this.senses_height, this.senses_height / 2 + 10]);
-  this.writes_y = d3.scaleBand().range([this.height, this.senses_height + 10]);
 
   this.numbers_line = d3
     .line()
@@ -398,7 +384,7 @@ function redraw() {
 
   d3.select(".loading").classed("hidden", true);
 
-  var mouseG = svgEnter
+  var mouseG = svg
     .append("g")
     .attr("class", "mouse-over-effects")
     .attr(
@@ -549,7 +535,9 @@ export default {
       config: {},
       dateTypes: dateTypes,
       oldSensesWrite: [],
-      recentSensesWrite: []
+      recentSensesWrite: [],
+      green: "#4CAF50",
+      timeformat: d3.timeFormat("%H:%M")
     }
   },
   pouch: {
@@ -609,6 +597,80 @@ export default {
 
   },
   computed: {
+    writes_y() {
+      return d3.scaleBand().range([this.height, this.sensesHeight + 10]);
+    },
+    percents_y() {
+      return d3
+        .scaleLinear()
+        .range([this.sensesHeight, this.sensesHeight / 2 + 10]);
+    },
+    numbers_y() {
+      return d3.scaleLinear().range([this.sensesHeight / 2, 0]);
+    },
+    x() {
+      return d3.scaleTime().range([0, this.width]);
+    },
+    margin() {
+      const SMALL = {
+        top: 10,
+        right: 40,
+        bottom: 30,
+        left: 40
+      }
+      const BIG = {
+        top: 20,
+        right: 80,
+        bottom: 30,
+        left: 80
+      }
+
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs': return {top: 0, right: 0, bottom: 30, left: 30}
+        case 'sm': return SMALL
+        case 'md': return BIG
+        case 'lg': return BIG
+        case 'xl': return BIG
+      }
+    },
+    writesHeight() {
+      const SMALL = 25;
+      const BIG = 50;
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs': return SMALL
+        case 'sm': return SMALL
+        case 'md': return BIG
+        case 'lg': return BIG
+        case 'xl': return BIG
+      }
+    },
+    totalWidth() {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs': return 220
+        case 'sm': return 422
+        case 'md': return 960
+        case 'lg': return 960
+        case 'xl': return 960
+      }
+    },
+    totalHeight() {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs': return 220
+        case 'sm': return 220
+        case 'md': return 500
+        case 'lg': return 500
+        case 'xl': return 500
+      }
+    },
+    width() {
+      return this.totalWidth - this.margin.left - this.margin.right;
+    },
+    height() {
+      return this.totalHeight - this.margin.top - this.margin.bottom;
+    },
+    sensesHeight() {
+      return this.height - this.writesHeight;
+    },
     sensesWrite() {
       return this.oldSensesWrite.concat(this.recentSensesWrite);
     },
@@ -649,6 +711,9 @@ export default {
     }
   },
   watch: {
+    totalWidth: function() {
+      this.redraw();
+    },
     sensesWrite: function(val) {
       this.redraw();
     },

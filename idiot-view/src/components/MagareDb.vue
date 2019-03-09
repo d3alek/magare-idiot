@@ -2,8 +2,8 @@
   <v-list-tile>
     <v-list-tile-avatar>
       <v-btn flat icon
-        :loading="active">
-        <v-icon>{{active ? "active" : (paused ? "done" : "")}}</v-icon>
+        :loading="pullOptions && active">
+        <v-icon>{{(pullOptions && paused) ? "done" : ""}}</v-icon>
       </v-btn>
     </v-list-tile-avatar>
     <v-list-tile-content>
@@ -31,7 +31,7 @@
           <v-card-text>
             {{active ? "Active" : "Paused"}} 
             <br>
-            Total Docs: {{docCount}}
+            Total Docs: {{docCount}} 
             <br>
             Docs Written this session: {{docsWritten}}
             <v-data-table
@@ -104,14 +104,14 @@ export default {
         return this.events[this.events.length-1].data;
       }
       else {
-        return {};
+        return null;
       }
     },
     active() {
-      return this.latestEvent.active || (this.latestEvent.info && this.latestEvent.info.ok);
+      return !this.paused;
     },
     paused() {
-      return this.latestEvent.paused;
+      return this.latestEvent === null || this.latestEvent.created || this.latestEvent.paused || (this.latestEvent.info && this.latestEvent.info.pending === 0);
     },
     docsWritten() {
       for (var i = this.events.length-1; i >= 0; --i) {
@@ -144,6 +144,16 @@ export default {
     });
     this.startPull();
     this.loadInfo();
+  },
+  watch: {
+    pullOptions: function(val) {
+      this.startPull();
+    },
+    paused: function(val) {
+      if (val) {
+        this.loadInfo();
+      }
+    }
   },
   methods: {
     loadInfo() {
